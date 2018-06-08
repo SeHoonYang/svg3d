@@ -74,6 +74,41 @@ python convert.py target_file > result.txt
 ```
 with target_file.obj and target_file.mtl(optional).
 
+# Programmable Vertex Shader
+You can add your own shader to each objects. Our shader receive 3 parameters; lightList, worldPosition, and aLight. lightList contains every light objects. worldPosition represents world coordinate of the vertex. aLight is a list to be returned.
+For example, if you want to assign a random color to each vertex, you can write shader like below. (Note that using Math.random() can cause problem on performance.)
+``` javascript
+function randomColorShader(lightList, worldPosition, aLight){
+	aLight[0] = Math.random() * 255 | 0 + 1;
+	aLight[1] = Math.random() * 255 | 0 + 1;
+	aLight[2] = Math.random() * 255 | 0 + 1;
+}
+```
+and attach this to your object
+``` javascript
+yourObject.setVertexShader(randomColorShader);
+```
 
+This is our default shader: (Only point light is implemented)
+``` javascript
+for(k = 0; k < lightList.length; ++k)
+{
+	var light = lightList[k];
+	if(light.type == 0)
+	{
+		// Point light
+		var d = Math.max(0.1, Math.pow(light.pos[0] - worldPosition[0], 2) + Math.pow(light.pos[1] - worldPosition[1], 2) + Math.pow(light.pos[2] - worldPosition[2], 2));
+
+		aLight[0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity);
+		aLight[1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity);
+		aLight[2] += Math.floor((light.color & 0xFF) / d * light.intensity);
+	}
+}
+```
+You can access this shader by context.defaultVertexShader:
+``` javascript
+// This code will set your object to use the default shader
+yourObject.setVertexShader(yourContextVariable.defaultVertexShader);
+```
 # License
 Please refer to License file.
