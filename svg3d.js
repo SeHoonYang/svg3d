@@ -1,7 +1,8 @@
 /*
 	svg3d.js 0.1
 	This file is licensed under the Apache License 2.0
-	
+	Copyright 2018 SeHoonYang
+
 	Author : SehoonYang
 	email : yangsehoon@kaist.ac.kr
 */
