@@ -3,7 +3,12 @@
 import sys
 
 def remove_slash(x):
-	return x[:x.find("/")]
+	slash_index = x.find("/")
+
+	if slash_index != -1:
+		return x[:slash_index]
+	else:
+		return x
 def get_color(lst, name):
 	for c in lst:
 		if c[0] == name :
