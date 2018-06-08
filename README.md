@@ -1,15 +1,15 @@
 # svg3d
 
-# About this library
+# About This Library
 The purpose of this library is to implement simple graphics(include vertex shader) using <svg> and <polygon> by javascript. This library does not implement rasterization, fragment shader, anti aliasing, texture mapping, etc. With this library, you are not able to access pixel data since this library make graphics by polygon which does not provide interface for accessing pixel data. So every functions that requires pixel data are not implemented. Also, this library generate huge number of polygon with <polygon>. Therefore, this library does not guarantee performance.
 
-# Library dependency
+# Library Dependency
 This libray includes gl-matrix(https://github.com/toji/gl-matrix) to perform matrix calculation. So you have to include gl-matrix.min.js before including the main script.
 
 # Browser Compatibility
 This library will available on browser that supports <svg> tag. Tested on IE11, Chrome67, Edge41
 
-# Quick quide
+# Quick Guide
 
 ### 1. Include script files and make placefor the canvas
 ``` HTML
