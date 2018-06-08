@@ -42,11 +42,27 @@ this.lightList = [];
 this.ViewPort = v;
 this.width = 0;
 this.height = 0;
+this.defaultVertexShader = function(lightList, worldPosition, aLight){
+	for(k = 0; k < lightList.length; ++k)
+	{
+		var light = lightList[k];
+		if(light.type == 0)
+		{
+			// Point light
+			var d = Math.max(0.1, Math.pow(light.pos[0] - worldPosition[0], 2) + Math.pow(light.pos[1] - worldPosition[1], 2) + Math.pow(light.pos[2] - worldPosition[2], 2));
 
-this.Object3d = function (vertices, pos, rot, scale) {
+			aLight[0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity);
+			aLight[1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity);
+			aLight[2] += Math.floor((light.color & 0xFF) / d * light.intensity);
+		}
+	}
+}
+
+this.Object3d = function (vertices, pos, rot, scale, defaultVertexShader) {
 	this.vertex = vertices;
 	this.pos = pos;
 	this.scale = scale; // Scale in [x,y,z] form
+	this.vertexShader = defaultVertexShader;
 
 	this.triangles = [];
 	for(i = 0; i < vertices.length; ++i){
@@ -79,10 +95,13 @@ this.Object3d = function (vertices, pos, rot, scale) {
 	this.getRotMat = function() {
 		return this.rot;
 	}
+	this.setVertexShader = function(f) {
+		this.vertexShader = f;
+	}
 }
 
 this.createObject = function(vertices, pos, rot, scale) {
-	var Obj = new this.Object3d(vertices, pos, rot, scale);
+	var Obj = new this.Object3d(vertices, pos, rot, scale, this.defaultVertexShader);
 	this.objectList.push(Obj);
 	return Obj;
 }
@@ -150,32 +169,9 @@ this.draw3d = function(){
 
 			var aLight = [[0,0,0],[0,0,0],[0,0,0]];
 
-			for(p = 0; p < 3; ++ p)
+			for(p = 0; p < 3; ++p)
 			{
-				// Vertex Shader
-				for(k = 0; k < this.lightList.length; ++k)
-				{
-					var light = this.lightList[k];
-					if(light.type == 0)
-					{
-						// Point light
-						var d = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint[p][0], 2) + Math.pow(light.pos[1] - WorldPoint[p][1], 2) + Math.pow(light.pos[2] - WorldPoint[p][2], 2));
-						//var d2 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint1[0], 2) + Math.pow(light.pos[1] - WorldPoint1[1], 2) + Math.pow(light.pos[2] - WorldPoint1[2], 2));
-						//var d3 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint2[0], 2) + Math.pow(light.pos[1] - WorldPoint2[1], 2) + Math.pow(light.pos[2] - WorldPoint2[2], 2));
-
-						aLight[p][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity);
-						aLight[p][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity);
-						aLight[p][2] += Math.floor((light.color & 0xFF) / d * light.intensity);
-
-						///aLight[1][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d2 * light.intensity);
-						///aLight[1][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d2 * light.intensity);
-						///aLight[1][2] += Math.floor((light.color & 0xFF) / d2 * light.intensity);
-
-						//aLight[2][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d3 * light.intensity);
-						//aLight[2][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d3 * light.intensity);
-						//aLight[2][2] += Math.floor((light.color & 0xFF) / d3 * light.intensity);
-					}
-				}
+				this.objectList[j].vertexShader(this.lightList, WorldPoint[p], aLight[p]);
 			}
 
 			var NormalizedPointClip0 = [PointClipMatrix[0] / PointClipMatrix[3], PointClipMatrix[1] / PointClipMatrix[3], PointClipMatrix[2] / PointClipMatrix[3]];
@@ -230,6 +226,11 @@ this.draw3d = function(){
 
 	this.ViewPort.innerHTML = "<svg width='"+this.width+"' height='"+this.height+"' overflow='hidden'>" + HTMLTags + "</svg>";
 }
+
+this.registerVertexShader = function(f) {
+	this.shaderList.push(f);
+}
+
 }
 function svg3djsInit(id, w, h, color) {
 	var ViewPort = document.getElementById(id);
