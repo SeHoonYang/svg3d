@@ -227,10 +227,6 @@ this.draw3d = function(){
 	this.ViewPort.innerHTML = "<svg width='"+this.width+"' height='"+this.height+"' overflow='hidden'>" + HTMLTags + "</svg>";
 }
 
-this.registerVertexShader = function(f) {
-	this.shaderList.push(f);
-}
-
 }
 function svg3djsInit(id, w, h, color) {
 	var ViewPort = document.getElementById(id);
