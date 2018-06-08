@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="../gl-matrix.min.js">
+	</script>
+	<script src="../svg3d.js">
+	</script>
+	<script src="objects.js">
+	</script>
+</head>
+<body>
+	<!-- viewport -->
+	<div align="center">
+		<div id="viewport_container">
+			<svg></svg>
+		</div>
+	</div>
+	<script>
+		// ViewPort
+		var ViewPortWidth = 1000;
+		var ViewPortHeight = 600;
+
+		var context = svg3djsInit("viewport_container", ViewPortWidth, ViewPortHeight, "#000000");
+		var bunny = context.createObject(bunny_vertices, [0, 4, -10], [90, 180, 0], [1,1,1]);
+		var sp1 = context.createObject(sp_vertices, [3,-3,-9], [0,0,0], [1,1,1]);
+		var sp2 = context.createObject(sp_vertices, [-3,0,-4], [0,0,0], [1,1,1]);
+		var sp3 = context.createObject(sp_vertices, [2.5,1,-4], [0,0,0], [1,1,1]);
+		var bunnyRotMat = bunny.getRotMat();
+
+		// Create Camera
+		var mainCamera = context.createCamera([0,0,0], [0,0,0], 0.1, 10000, ViewPortWidth / ViewPortHeight, 35 * Math.PI / 180);
+		// Create PointLight
+		var pLight1 = context.createPointLight([-10,4,-10], 0xFF0000, 15.0);
+		var pLight2 = context.createPointLight([5,4,-7], 0x00FFFF, 4.0);
+
+		// Mouse manipulation
+		var ViewPort = document.getElementById("viewport_container");
+		var x = ViewPortWidth / 2;
+		var y = ViewPortHeight / 2;
+		onmousemove = function(e){
+			var vp = ViewPort.getBoundingClientRect();
+			x = Math.max(0, Math.min(ViewPortWidth, e.clientX - vp.left));
+			y = Math.max(0, Math.min(ViewPortHeight, e.clientY - vp.top));
+		}
+
+		// Rendering Loop
+		setInterval(loop, 25);
+
+		function loop() {
+			// Apply  rotation
+			var rot_q = quat.create();
+			var rot_m = mat4.create();		
+			quat.fromEuler(rot_q, - (y / ViewPortHeight - 0.5) * 180, (x / ViewPortWidth - 0.5) * 180, 0);
+			mat4.fromQuat(rot_m, rot_q);
+			mat4.multiply(rot_m, rot_m, bunnyRotMat);
+			bunny.rotateTo(rot_m);
+
+			var sp_rot_m = mat4.create();
+			mat4.fromYRotation(sp_rot_m, 0.01);
+			sp3.rotate(sp_rot_m);
+
+			mat4.fromYRotation(sp_rot_m, 0.05);
+			sp2.rotate(sp_rot_m);
+
+			context.draw3d();
+		}
+	</script>
+</body>
+</html>
