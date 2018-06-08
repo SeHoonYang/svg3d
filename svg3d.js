@@ -146,33 +146,35 @@ this.draw3d = function(){
 			mat4.multiply(position, Obj, PointClipMatrix);
 			mat4.multiply(PointClipMatrix, this.camList[0].VP, position);
 
-			var WorldPoint0 = _vec3(position[0], position[1], position[2]);
-			var WorldPoint1 = _vec3(position[4], position[5], position[6]);
-			var WorldPoint2 = _vec3(position[8], position[9], position[10]);
+			var WorldPoint = [_vec3(position[0], position[1], position[2]), _vec3(position[4], position[5], position[6]), _vec3(position[8], position[9], position[10])];
 
 			var aLight = [[0,0,0],[0,0,0],[0,0,0]];
-			// Vertex Shader
-			for(k = 0; k < this.lightList.length; ++k)
+
+			for(p = 0; p < 3; ++ p)
 			{
-				var light = this.lightList[k];
-				if(light.type == 0)
+				// Vertex Shader
+				for(k = 0; k < this.lightList.length; ++k)
 				{
-					// Point light
-					var d1 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint0[0], 2) + Math.pow(light.pos[1] - WorldPoint0[1], 2) + Math.pow(light.pos[2] - WorldPoint0[2], 2));
-					var d2 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint1[0], 2) + Math.pow(light.pos[1] - WorldPoint1[1], 2) + Math.pow(light.pos[2] - WorldPoint1[2], 2));
-					var d3 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint2[0], 2) + Math.pow(light.pos[1] - WorldPoint2[1], 2) + Math.pow(light.pos[2] - WorldPoint2[2], 2));
+					var light = this.lightList[k];
+					if(light.type == 0)
+					{
+						// Point light
+						var d = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint[p][0], 2) + Math.pow(light.pos[1] - WorldPoint[p][1], 2) + Math.pow(light.pos[2] - WorldPoint[p][2], 2));
+						//var d2 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint1[0], 2) + Math.pow(light.pos[1] - WorldPoint1[1], 2) + Math.pow(light.pos[2] - WorldPoint1[2], 2));
+						//var d3 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint2[0], 2) + Math.pow(light.pos[1] - WorldPoint2[1], 2) + Math.pow(light.pos[2] - WorldPoint2[2], 2));
 
-					aLight[0][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d1 * light.intensity);
-					aLight[0][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d1 * light.intensity);
-					aLight[0][2] += Math.floor((light.color & 0xFF) / d1 * light.intensity);
+						aLight[p][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity);
+						aLight[p][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity);
+						aLight[p][2] += Math.floor((light.color & 0xFF) / d * light.intensity);
 
-					aLight[1][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d2 * light.intensity);
-					aLight[1][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d2 * light.intensity);
-					aLight[1][2] += Math.floor((light.color & 0xFF) / d2 * light.intensity);
+						///aLight[1][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d2 * light.intensity);
+						///aLight[1][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d2 * light.intensity);
+						///aLight[1][2] += Math.floor((light.color & 0xFF) / d2 * light.intensity);
 
-					aLight[2][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d3 * light.intensity);
-					aLight[2][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d3 * light.intensity);
-					aLight[2][2] += Math.floor((light.color & 0xFF) / d3 * light.intensity);
+						//aLight[2][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d3 * light.intensity);
+						//aLight[2][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d3 * light.intensity);
+						//aLight[2][2] += Math.floor((light.color & 0xFF) / d3 * light.intensity);
+					}
 				}
 			}
 
