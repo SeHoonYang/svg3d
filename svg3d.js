@@ -150,7 +150,7 @@ this.draw3d = function(){
 			var WorldPoint1 = _vec3(position[4], position[5], position[6]);
 			var WorldPoint2 = _vec3(position[8], position[9], position[10]);
 
-			var aLight = [0,0,0];
+			var aLight = [[0,0,0],[0,0,0],[0,0,0]];
 			// Vertex Shader
 			for(k = 0; k < this.lightList.length; ++k)
 			{
@@ -162,15 +162,17 @@ this.draw3d = function(){
 					var d2 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint1[0], 2) + Math.pow(light.pos[1] - WorldPoint1[1], 2) + Math.pow(light.pos[2] - WorldPoint1[2], 2));
 					var d3 = Math.max(0.1, Math.pow(light.pos[0] - WorldPoint2[0], 2) + Math.pow(light.pos[1] - WorldPoint2[1], 2) + Math.pow(light.pos[2] - WorldPoint2[2], 2));
 
-					aLight[0] += Math.min(0xFF,Math.floor(((light.color & 0xFF0000) / 0x010000) / d1 * light.intensity)) * 0x010000 +
-					Math.min(0xFF,Math.floor(((light.color & 0xFF00) / 0x0100) / d1 * light.intensity)) * 0x0100 +
-					Math.min(0xFF,Math.floor((light.color & 0xFF) / d1 * light.intensity));
-					aLight[1] += Math.min(0xFF,Math.floor(((light.color & 0xFF0000) / 0x010000) / d2 * light.intensity)) * 0x010000 +
-					Math.min(0xFF,Math.floor(((light.color & 0xFF00) / 0x0100) / d2 * light.intensity)) * 0x0100 +
-					Math.min(0xFF,Math.floor((light.color & 0xFF) / d2 * light.intensity));
-					aLight[2] += Math.min(0xFF,Math.floor(((light.color & 0xFF0000) / 0x010000) / d3 * light.intensity)) * 0x010000 +
-					Math.min(0xFF,Math.floor(((light.color & 0xFF00) / 0x0100) / d3 * light.intensity)) * 0x0100 +
-					Math.min(0xFF,Math.floor((light.color & 0xFF)) / d3 * light.intensity);
+					aLight[0][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d1 * light.intensity);
+					aLight[0][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d1 * light.intensity);
+					aLight[0][2] += Math.floor((light.color & 0xFF) / d1 * light.intensity);
+
+					aLight[1][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d2 * light.intensity);
+					aLight[1][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d2 * light.intensity);
+					aLight[1][2] += Math.floor((light.color & 0xFF) / d2 * light.intensity);
+
+					aLight[2][0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d3 * light.intensity);
+					aLight[2][1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d3 * light.intensity);
+					aLight[2][2] += Math.floor((light.color & 0xFF) / d3 * light.intensity);
 				}
 			}
 
@@ -191,10 +193,23 @@ this.draw3d = function(){
 			if(z >= 0.0 && z <= 1.0 && ((bounded(ScreenPoint0[0], 0, this.width) && bounded(ScreenPoint0[1], 0, this.height)) || (bounded(ScreenPoint1[0], 0, this.width) && bounded(ScreenPoint1[1], 0, this.height)) || (bounded(ScreenPoint2[0], 0, this.width) && bounded(ScreenPoint2[1], 0, this.height))))
 			{
 				function addLight(l,r){
-					return Math.min(0xFF0000, (l & 0xFF0000) + (r & 0xFF0000)) + Math.min(0xFF00, (l & 0xFF00) + (r & 0xFF00)) + Math.min(0xFF, (l & 0xFF) + (r & 0xFF));
+					return [(l & 0xFF0000) / 0x010000 +r[0],(l & 0xFF00) / 0x100 +r[1],(l & 0xFF)+r[2]];
 				}
 				function addLight2(x,y,z){
-					return Math.min(0xFF0000, Math.floor(((x & 0xFF0000) / 0x10000 + (y & 0xFF0000) / 0x10000 + (z & 0xFF0000) / 0x10000)/3) * 0x10000) + Math.min(0xFF00, Math.floor(((x & 0xFF00) / 0x100 + (y & 0xFF00) / 0x100 + (z & 0xFF00) / 0x100)/3) * 0x100) + Math.min(0xFF, Math.floor(((x & 0xFF) + (y & 0xFF) + (z & 0xFF))/3));
+					var r = x[0] + y[0] + z[0];
+					var g = x[1] + y[1] + z[1];
+					var b = x[2] + y[2] + z[2];
+
+					var max = Math.max(r,g,b);
+					if(max > 0xFF)
+					{
+						r = Math.floor(r * 0xFF / max);
+						g = Math.floor(g * 0xFF / max);
+						b = Math.floor(b * 0xFF / max);
+					}
+
+					return r * 0x010000 + g * 0x0100 + b;
+					
 				}
 				var color = addLight2(addLight(triangles[i][0][3], aLight[0]),addLight(triangles[i][1][3], aLight[1]),addLight(triangles[i][2][3], aLight[2]));
 				
@@ -207,7 +222,7 @@ this.draw3d = function(){
 	results.sort(function(l,r){return r[3] - l[3]});
 	for(i = 0; i < results.length; ++i) {
 		var PointString = results[i][0][0] + ',' + results[i][0][1] + ' ' + results[i][1][0] + ',' + results[i][1][1] + ' ' + results[i][2][0] + ',' + results[i][2][1];
-		var color = decimalToHexString(Math.floor(results[i][4]));
+		var color = decimalToHexString(results[i][4]);
 		HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '"></polygon>';
 	}
 
