@@ -42,7 +42,7 @@ this.lightList = [];
 this.ViewPort = v;
 this.width = 0;
 this.height = 0;
-this.defaultVertexShader = function(lightList, worldPosition, aLight){
+this.defaultVertexShader = function(lightList, worldPosition, normal, aLight){
 	for(k = 0; k < lightList.length; ++k)
 	{
 		var light = lightList[k];
@@ -60,6 +60,7 @@ this.defaultVertexShader = function(lightList, worldPosition, aLight){
 
 this.Object3d = function (vertices, pos, rot, scale, defaultVertexShader) {
 	this.vertex = vertices;
+	this.normal = [];
 	this.pos = pos;
 	this.scale = scale; // Scale in [x,y,z] form
 	this.vertexShader = defaultVertexShader;
@@ -72,6 +73,15 @@ this.Object3d = function (vertices, pos, rot, scale, defaultVertexShader) {
 		var color = vertices[i][3];
 
 		this.triangles.push([vert0, vert1, vert2, color]);
+
+		// Calculate normal
+		var vec0 = _vec3(vert0[0] - vert1[0], vert0[1] - vert1[1], vert0[2] - vert1[2]);
+		var vec1 = _vec3(vert0[0] - vert2[0], vert0[1] - vert2[1], vert0[2] - vert2[2]);
+		var norm = vec3.create();
+		vec3.cross(norm, vec0, vec1);
+		vec3.normalize(norm, norm);
+
+		this.normal.push([norm[0],norm[1],norm[2],0]);
 	}
 	var rot_m = mat4.create();
 	var rot_q = quat.create();
@@ -145,25 +155,29 @@ this.draw3d = function(){
 		// Calculate Model matrix
 		Obj = mat4.create();
 		mat4.scale(Obj, Obj, _vec3(this.objectList[j].scale[0], this.objectList[j].scale[1], this.objectList[j].scale[2]));
-			
-		var rot_q = quat.create();
-		var rot_m = mat4.create();
 
-		// Apply rotation
+		// Apply transformation
 		mat4.multiply(Obj, this.objectList[j].rot, Obj);
-
-		// Apply translation
 		mat4.add(Obj, Obj, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,this.objectList[j].pos[0],this.objectList[j].pos[1],this.objectList[j].pos[2],0));
+
+		// Calculate normal
+		ObjNorm = mat4.create();
+		mat4.scale(ObjNorm, ObjNorm, _vec3(1/this.objectList[j].scale[0], 1/this.objectList[j].scale[1], 1/this.objectList[j].scale[2]));
+		mat4.multiply(ObjNorm, this.objectList[j].rot, ObjNorm);
 
 		var triangles = this.objectList[j].triangles;
 		for(i = 0; i < triangles.length; ++i) {
 			var PointClipMatrix = mat4.create();
 			mat4.set(PointClipMatrix, triangles[i][0][0], triangles[i][0][1], triangles[i][0][2], 1,triangles[i][1][0], triangles[i][1][1], triangles[i][1][2], 1,triangles[i][2][0], triangles[i][2][1], triangles[i][2][2], 1,0,0,0,0);
 
-			// position : world coordinate
+			// position, normal : world coordinate
 			var position = mat4.create();
 			mat4.multiply(position, Obj, PointClipMatrix);
 			mat4.multiply(PointClipMatrix, this.camList[0].VP, position);
+
+			var normal = vec4.create();
+			mat4.multiply(normal, ObjNorm, this.objectList[j].normal[i]);
+			vec4.normalize(normal, normal);
 
 			var WorldPoint = [_vec3(position[0], position[1], position[2]), _vec3(position[4], position[5], position[6]), _vec3(position[8], position[9], position[10])];
 
@@ -171,7 +185,7 @@ this.draw3d = function(){
 
 			for(p = 0; p < 3; ++p)
 			{
-				this.objectList[j].vertexShader(this.lightList, WorldPoint[p], aLight[p]);
+				this.objectList[j].vertexShader(this.lightList, WorldPoint[p], normal, aLight[p]);
 			}
 
 			var NormalizedPointClip0 = [PointClipMatrix[0] / PointClipMatrix[3], PointClipMatrix[1] / PointClipMatrix[3], PointClipMatrix[2] / PointClipMatrix[3]];
@@ -207,10 +221,10 @@ this.draw3d = function(){
 					}
 
 					return r * 0x010000 + g * 0x0100 + b;
-					
+	
 				}
 				var color = addLight2(addLight(triangles[i][0][3], aLight[0]),addLight(triangles[i][1][3], aLight[1]),addLight(triangles[i][2][3], aLight[2]));
-				
+
 				var resultPoint = [ScreenPoint0, ScreenPoint1, ScreenPoint2, NormalizedPointClip0[2] + NormalizedPointClip1[2] + NormalizedPointClip2[2], color];
 				results.push(resultPoint);
 			}
