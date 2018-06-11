@@ -8,10 +8,10 @@
 	<script src="objects.js">
 	</script>
 	<script>
-		function randomColorShader(lightList, worldPosition, aLight){
-			aLight[0] = Math.random() * 255 | 0 + 1;
-			aLight[1] = Math.random() * 255 | 0 + 1;
-			aLight[2] = Math.random() * 255 | 0 + 1;
+		function NormalColorShader(lightList, worldPosition, normal, baseColor, finalColor){
+			finalColor[0] = Math.floor((Math.floor(normal[0] * 128) + 128)*255/256);
+			finalColor[1] = Math.floor((Math.floor(normal[1] * 128) + 128)*255/256);
+			finalColor[2] = Math.floor((Math.floor(normal[2] * 128) + 128)*255/256);
 		}
 	</script>
 </head>
@@ -19,7 +19,6 @@
 	<!-- viewport -->
 	<div align="center">
 		<div id="viewport_container">
-			<svg></svg>
 		</div>
 	</div>
 	<script>
@@ -32,14 +31,14 @@
 		var sp1 = context.createObject(sp_vertices, [3,-3,-9], [0,0,0], [1,1,1]);
 		var sp2 = context.createObject(sp_vertices, [-3,0,-4], [0,0,0], [1,1,1]);
 		var sp3 = context.createObject(sp_vertices, [2.5,1,-4], [0,0,0], [1,1,1]);
-		sp3.setVertexShader(randomColorShader);
+		bunny.setVertexShader(NormalColorShader);
 		var bunnyRotMat = bunny.getRotMat();
 
 		// Create Camera
 		var mainCamera = context.createCamera([0,0,0], [0,0,0], 0.1, 10000, ViewPortWidth / ViewPortHeight, 35 * Math.PI / 180);
 		// Create PointLight
-		var pLight1 = context.createPointLight([-10,4,-10], 0xFF0000, 120.0);
-		var pLight2 = context.createPointLight([5,4,-7], 0x00AAFF, 30.0);
+		var pLight1 = context.createPointLight([-2,0,-4], 0xFF0000, 0.5);
+		var pLight2 = context.createPointLight([5,4,-7], 0x00AAFF, 1.0);
 
 		// Mouse manipulation
 		var ViewPort = document.getElementById("viewport_container");
