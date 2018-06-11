@@ -48,7 +48,7 @@ var camPosition = [0,0,5];
 var camRotation = [0,0,0];
 var near = 0.1;
 var far = 10000;
-var fovy = 35 * Math.PI / 180;
+var fovy = 70;
 
 var mainCamera = context.createCamera(camPosition, camRotation, near, far, viewPortWidth / viewPortHeight, fovy);
 ```

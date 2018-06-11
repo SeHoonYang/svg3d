@@ -138,7 +138,7 @@ this.updateCamera = function(cam, pos, rot, n, f, aspect, fov) {
 	mat4.subtract(Camera, Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
 
 	// Define Frustum
-	var Projection = _mat4(1 / aspect / Math.tan(fov),0,0,0,0,1 / Math.tan(fov),0,0,0,0,-(f+n)/(f-n),-1,0,0,-2*f*n/(f-n),0);
+	var Projection = _mat4(1 / aspect / Math.tan(fov * Math.PI / 360),0,0,0,0,1 / Math.tan(fov * Math.PI / 360),0,0,0,0,-(f+n)/(f-n),-1,0,0,-2*f*n/(f-n),0);
 
 	// Calculate View * Projection
 	cam.VP = mat4.create();
