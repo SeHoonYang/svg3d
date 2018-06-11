@@ -150,7 +150,7 @@ for(k = 0; k < lightList.length; ++k)
 }
 ```
 
-You can access this shader by context.defaultVertexShader:
+You can access default shader by context.defaultVertexShader:
 ``` javascript
 // This code will set your object to use the default shader
 yourObject.setVertexShader(yourContextVariable.defaultVertexShader);
