@@ -49,11 +49,19 @@ this.defaultVertexShader = function(lightList, worldPosition, normal, aLight){
 		if(light.type == 0)
 		{
 			// Point light
-			var d = Math.max(0.1, Math.pow(light.pos[0] - worldPosition[0], 2) + Math.pow(light.pos[1] - worldPosition[1], 2) + Math.pow(light.pos[2] - worldPosition[2], 2));
+			var d = Math.max(0.1, Math.sqrt(Math.pow(light.pos[0] - worldPosition[0], 2) + Math.pow(light.pos[1] - worldPosition[1], 2) + Math.pow(light.pos[2] - worldPosition[2], 2)));
 
-			aLight[0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity);
-			aLight[1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity);
-			aLight[2] += Math.floor((light.color & 0xFF) / d * light.intensity);
+			var worldPos = vec3.create();
+			vec3.normalize(worldPos, worldPosition);
+			vec3.scale(worldPos, worldPos, -1);
+			var dot = vec3.dot(normal, worldPos);
+
+			if(dot > 0)
+			{
+				aLight[0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity * dot * 10);
+				aLight[1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity * dot * 10);
+				aLight[2] += Math.floor((light.color & 0xFF) / d * light.intensity * dot * 10);
+			}
 		}
 	}
 }
@@ -178,6 +186,7 @@ this.draw3d = function(){
 			var normal = vec4.create();
 			mat4.multiply(normal, ObjNorm, this.objectList[j].normal[i]);
 			vec4.normalize(normal, normal);
+			normal = _vec3(normal[0], normal[1], normal[2]);
 
 			var WorldPoint = [_vec3(position[0], position[1], position[2]), _vec3(position[4], position[5], position[6]), _vec3(position[8], position[9], position[10])];
 
@@ -204,13 +213,10 @@ this.draw3d = function(){
 			var z = 0.5 + NormalizedPointClip0[2] * 0.5;
 			if(z >= 0.0 && z <= 1.0 && ((bounded(ScreenPoint0[0], 0, this.width) && bounded(ScreenPoint0[1], 0, this.height)) || (bounded(ScreenPoint1[0], 0, this.width) && bounded(ScreenPoint1[1], 0, this.height)) || (bounded(ScreenPoint2[0], 0, this.width) && bounded(ScreenPoint2[1], 0, this.height))))
 			{
-				function addLight(l,r){
-					return [(l & 0xFF0000) / 0x010000 +r[0],(l & 0xFF00) / 0x100 +r[1],(l & 0xFF)+r[2]];
-				}
-				function addLight2(x,y,z){
-					var r = x[0] + y[0] + z[0];
-					var g = x[1] + y[1] + z[1];
-					var b = x[2] + y[2] + z[2];
+				function addLight(x,y,z){
+					var r = Math.floor((x[0] + y[0] + z[0])/3);
+					var g = Math.floor((x[1] + y[1] + z[1])/3);
+					var b = Math.floor((x[2] + y[2] + z[2])/3);
 
 					var max = Math.max(r,g,b);
 					if(max > 0xFF)
@@ -223,7 +229,7 @@ this.draw3d = function(){
 					return r * 0x010000 + g * 0x0100 + b;
 	
 				}
-				var color = addLight2(addLight(triangles[i][0][3], aLight[0]),addLight(triangles[i][1][3], aLight[1]),addLight(triangles[i][2][3], aLight[2]));
+				var color = addLight(aLight[0],aLight[1],aLight[2]);
 
 				var resultPoint = [ScreenPoint0, ScreenPoint1, ScreenPoint2, NormalizedPointClip0[2] + NormalizedPointClip1[2] + NormalizedPointClip2[2], color];
 				results.push(resultPoint);
@@ -235,7 +241,7 @@ this.draw3d = function(){
 	for(i = 0; i < results.length; ++i) {
 		var PointString = results[i][0][0] + ',' + results[i][0][1] + ' ' + results[i][1][0] + ',' + results[i][1][1] + ' ' + results[i][2][0] + ',' + results[i][2][1];
 		var color = decimalToHexString(results[i][4]);
-		HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '"></polygon>';
+		HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '"></polygon>';
 	}
 
 	this.ViewPort.innerHTML = "<svg width='"+this.width+"' height='"+this.height+"' overflow='hidden'>" + HTMLTags + "</svg>";
