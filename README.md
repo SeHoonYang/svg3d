@@ -51,6 +51,9 @@ var far = 10000;
 var fovy = 70;
 
 var mainCamera = context.createCamera(camPosition, camRotation, near, far, viewPortWidth / viewPortHeight, fovy);
+
+// Or you can make a camera using orthographic projection 
+//var mainCamera = context.createOrthoCamera([0,0,0], [0,0,0], 10, 6, 0.1, 10000);
 ```
 ### 5. Create a Point Light
 ``` javascript
