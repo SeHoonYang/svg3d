@@ -138,7 +138,23 @@ this.updateCamera = function(cam, pos, rot, n, f, aspect, fov) {
 	mat4.subtract(Camera, Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
 
 	// Define Frustum
-	var Projection = _mat4(1 / aspect / Math.tan(fov),0,0,0,0,1 / Math.tan(fov),0,0,0,0,-(f+n)/(f-n),-1,0,0,-2*f*n/(f-n),0);
+	var Projection = _mat4(1 / aspect / Math.tan(fov * Math.PI / 360),0,0,0,0,1 / Math.tan(fov * Math.PI / 360),0,0,0,0,(f+n)/(n-f),-1,0,0,2*f*n/(n-f),0);
+
+	// Calculate View * Projection
+	cam.VP = mat4.create();
+	mat4.multiply(cam.VP, Projection, Camera);
+}
+
+this.updateOrthoCamera = function(cam, pos, rot, w, h, n, f) {
+	// Camera transformation
+	var Camera = mat4.create();
+	var rot_q = quat.create();
+	quat.fromEuler(rot_q, -rot[0], -rot[1], -rot[2]);
+	mat4.fromQuat(Camera, rot_q);
+	mat4.subtract(Camera, Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
+
+	// Define Frustum
+	var Projection = _mat4(1 / w,0,0,0,0,1 / h,0,0,0,0,2/(n-f),0,0,0,(f+n)/(n-f),1);
 
 	// Calculate View * Projection
 	cam.VP = mat4.create();
@@ -152,6 +168,15 @@ this.createCamera = function(pos, rot, n, f, aspect, fov) {
 	this.updateCamera(cam, pos, rot, n, f, aspect, fov);
 	this.camList.push(cam);
 	return cam;
+}
+this.createOrthoCamera = function(pos, rot, w, h, n, f) {
+	var camObj = new this.Object3d([], pos, rot, [1,1,1]);
+	var cam = new Object({obj:camObj, VP:undefined});
+
+	this.updateOrthoCamera(cam, pos, rot, w, h, n, f);
+	this.camList.push(cam);
+	return cam;
+
 }
 this.createPointLight = function(pos, color, intensity) {
 	var pLight = new Object({pos:pos,rot:mat4.create(),color:color,intensity:intensity,type:0});
