@@ -42,7 +42,7 @@ this.lightList = [];
 this.ViewPort = v;
 this.width = 0;
 this.height = 0;
-this.defaultVertexShader = function(lightList, worldPosition, normal, aLight){
+this.defaultVertexShader = function(lightList, worldPosition, normal, baseColor, finalColor){
 	for(k = 0; k < lightList.length; ++k)
 	{
 		var light = lightList[k];
@@ -58,9 +58,9 @@ this.defaultVertexShader = function(lightList, worldPosition, normal, aLight){
 
 			if(dot > 0)
 			{
-				aLight[0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity * dot * 10);
-				aLight[1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity * dot * 10);
-				aLight[2] += Math.floor((light.color & 0xFF) / d * light.intensity * dot * 10);
+				finalColor[0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity * dot * 10);
+				finalColor[1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity * dot * 10);
+				finalColor[2] += Math.floor((light.color & 0xFF) / d * light.intensity * dot * 10);
 			}
 		}
 	}
@@ -190,11 +190,12 @@ this.draw3d = function(){
 
 			var WorldPoint = [_vec3(position[0], position[1], position[2]), _vec3(position[4], position[5], position[6]), _vec3(position[8], position[9], position[10])];
 
-			var aLight = [[0,0,0],[0,0,0],[0,0,0]];
+			var finalColor = [[0,0,0],[0,0,0],[0,0,0]];
 
 			for(p = 0; p < 3; ++p)
 			{
-				this.objectList[j].vertexShader(this.lightList, WorldPoint[p], normal, aLight[p]);
+				var baseColor = [(triangles[i][p][3] & 0xFF0000) / 0x010000, (triangles[i][p][3] & 0xFF00) / 0x0100, triangles[i][p][3] & 0xFF];
+				this.objectList[j].vertexShader(this.lightList, WorldPoint[p], normal, baseColor, finalColor[p]);
 			}
 
 			var NormalizedPointClip0 = [PointClipMatrix[0] / PointClipMatrix[3], PointClipMatrix[1] / PointClipMatrix[3], PointClipMatrix[2] / PointClipMatrix[3]];
@@ -229,7 +230,7 @@ this.draw3d = function(){
 					return r * 0x010000 + g * 0x0100 + b;
 	
 				}
-				var color = addLight(aLight[0],aLight[1],aLight[2]);
+				var color = addLight(finalColor[0], finalColor[1], finalColor[2]);
 
 				var resultPoint = [ScreenPoint0, ScreenPoint1, ScreenPoint2, NormalizedPointClip0[2] + NormalizedPointClip1[2] + NormalizedPointClip2[2], color];
 				results.push(resultPoint);

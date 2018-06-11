@@ -8,10 +8,10 @@
 	<script src="objects.js">
 	</script>
 	<script>
-		function NormalColorShader(lightList, worldPosition, normal, aLight){
-			aLight[0] = Math.floor((Math.floor(normal[0] * 128) + 128)*255/256);
-			aLight[1] = Math.floor((Math.floor(normal[1] * 128) + 128)*255/256);
-			aLight[2] = Math.floor((Math.floor(normal[2] * 128) + 128)*255/256);
+		function NormalColorShader(lightList, worldPosition, normal, baseColor, finalColor){
+			finalColor[0] = Math.floor((Math.floor(normal[0] * 128) + 128)*255/256);
+			finalColor[1] = Math.floor((Math.floor(normal[1] * 128) + 128)*255/256);
+			finalColor[2] = Math.floor((Math.floor(normal[2] * 128) + 128)*255/256);
 		}
 	</script>
 </head>
