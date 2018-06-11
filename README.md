@@ -75,7 +75,7 @@ python convert.py target_file > result.txt
 with target_file.obj and target_file.mtl(optional).
 
 # Programmable Vertex Shader
-You can add your own shader to each objects. Our shader receive 5 parameters; lightList, worldPosition, normal, baseColor, and aLight. lightList contains every light objects. worldPosition represents world coordinate of the vertex. normal is a world space noraml. baseColor is a diffuse color of the vertex. finalColor is a list of colors(r,g,b) to be returned.
+You can add your own shader to each objects. Our shader receive 5 parameters; lightList, worldPosition, normal, baseColor, and finalColor. lightList contains every light objects. worldPosition represents world coordinate of the vertex. normal is a world space noraml. baseColor is a diffuse color of the vertex. finalColor is a list of colors(r,g,b) to be returned.
 For example, if you want to assign a random color to each vertex, you can write shader like below.
 ``` javascript
 function randomColorShader(lightList, worldPosition, normal, baseColor, finalColor){
