@@ -106,13 +106,50 @@ for(k = 0; k < lightList.length; ++k)
 
 		if(dot > 0)
 		{
-			finalColor[0] += baseColor[0] * ((light.color & 0xFF0000) / 0x010000) / d * light.intensity * dot * 10 / 255;
-			finalColor[1] += baseColor[1] * ((light.color & 0xFF00) / 0x0100) / d * light.intensity * dot * 10 / 255;
-			finalColor[2] += baseColor[2] * (light.color & 0xFF) / d * light.intensity * dot * 10 / 255;
+			finalColor[0] += ((light.color & 0xFF0000) / 0x010000) / d * light.intensity * dot * 10;
+			finalColor[1] += ((light.color & 0xFF00) / 0x0100) / d * light.intensity * dot * 10;
+			finalColor[2] += (light.color & 0xFF) / d * light.intensity * dot * 10;
+		}
+	}
+}
+
+// Ambient Light
+finalColor[0] += baseColor[0] * 0.2;
+finalColor[1] += baseColor[1] * 0.2;
+finalColor[2] += baseColor[2] * 0.2;
+```
+If you just want to use ambient color, you can write shader like this:
+``` javascript
+finalColor[0] = baseColor[0];
+finalColor[1] = baseColor[1];
+finalColor[2] = baseColor[2];
+```
+or you can :
+``` javascript
+// Ambient color with basic shadows with a point light
+for(k = 0; k < lightList.length; ++k)
+{
+	var light = lightList[k];
+	if(light.type == 0)
+	{
+		// Point light
+		var d = Math.max(0.1, Math.sqrt(Math.pow(light.pos[0] - worldPosition[0], 2) + Math.pow(light.pos[1] - worldPosition[1], 2) + Math.pow(light.pos[2] - worldPosition[2], 2)));
+
+		var worldPos = vec3.create();
+		vec3.normalize(worldPos, worldPosition);
+		vec3.scale(worldPos, worldPos, -1);
+		var dot = vec3.dot(normal, worldPos);
+
+		if(dot > 0)
+		{
+			finalColor[0] += baseColor[0] / d * light.intensity * dot;
+			finalColor[1] += baseColor[1] / d * light.intensity * dot;
+			finalColor[2] += baseColor[2] / d * light.intensity * dot;
 		}
 	}
 }
 ```
+
 You can access this shader by context.defaultVertexShader:
 ``` javascript
 // This code will set your object to use the default shader
