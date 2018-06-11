@@ -58,9 +58,9 @@ this.defaultVertexShader = function(lightList, worldPosition, normal, baseColor,
 
 			if(dot > 0)
 			{
-				finalColor[0] += Math.floor(((light.color & 0xFF0000) / 0x010000) / d * light.intensity * dot * 10);
-				finalColor[1] += Math.floor(((light.color & 0xFF00) / 0x0100) / d * light.intensity * dot * 10);
-				finalColor[2] += Math.floor((light.color & 0xFF) / d * light.intensity * dot * 10);
+				finalColor[0] += baseColor[0] * ((light.color & 0xFF0000) / 0x010000) / d * light.intensity * dot * 10 / 255;
+				finalColor[1] += baseColor[1] * ((light.color & 0xFF00) / 0x0100) / d * light.intensity * dot * 10 / 255;
+				finalColor[2] += baseColor[2] * (light.color & 0xFF) / d * light.intensity * dot * 10 / 255;
 			}
 		}
 	}
