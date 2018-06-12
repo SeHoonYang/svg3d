@@ -36,6 +36,7 @@ function decimalToHexString(number){
 
 function svg3dContext(v){
 
+this.objAdded = true;
 this.objectList = [];
 this.camList = [];
 this.lightList = [];
@@ -126,6 +127,7 @@ this.Object3d = function (vertices, pos, rot, scale, defaultVertexShader) {
 this.createObject = function(vertices, pos, rot, scale) {
 	var Obj = new this.Object3d(vertices, pos, rot, scale, this.defaultVertexShader);
 	this.objectList.push(Obj);
+	this.objAdded = true;
 	return Obj;
 }
 
@@ -272,10 +274,26 @@ this.draw3d = function(){
 	for(i = 0; i < results.length; ++i) {
 		var PointString = results[i][0][0] + ',' + results[i][0][1] + ' ' + results[i][1][0] + ',' + results[i][1][1] + ' ' + results[i][2][0] + ',' + results[i][2][1];
 		var color = decimalToHexString(results[i][4]);
-		HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '"></polygon>';
+		if(this.objAdded)
+			HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '" id="tris_'+ i +'" onClick="console.log('+i+')"></polygon>';
+		else
+		{
+			var tris = document.getElementById("tris_" + i);
+			tris.style['fill'] = color;
+			tris.setAttribute("points", PointString);
+			tris.setAttribute("stroke", color);
+		}
 	}
 
-	this.ViewPort.innerHTML = "<svg width='"+this.width+"' height='"+this.height+"' overflow='hidden'>" + HTMLTags + "</svg>";
+	if(this.objAdded)
+	{
+		this.objAdded = false;
+		this.__initial_drawing(this.ViewPort, "<svg width='"+this.width+"' height='"+this.height+"' overflow='hidden'>" + HTMLTags + "</svg>");
+	}
+}
+
+this.__initial_drawing = function(v, s){
+	v.innerHTML = s;
 }
 
 }

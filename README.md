@@ -19,7 +19,6 @@ This library will available on browser that supports <svg> tag. Tested on IE11, 
 </script>
 
 <div id="viewportContainer">
-	<svg></svg>
 </div>
 ```
 ### 2. Set Up the Context
