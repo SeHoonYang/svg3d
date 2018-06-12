@@ -275,7 +275,7 @@ this.draw3d = function(){
 		var PointString = results[i][0][0] + ',' + results[i][0][1] + ' ' + results[i][1][0] + ',' + results[i][1][1] + ' ' + results[i][2][0] + ',' + results[i][2][1];
 		var color = decimalToHexString(results[i][4]);
 		if(this.objAdded)
-			HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '" id="tris_'+ i +'" onClick="alert(1)"></polygon>';
+			HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '" id="tris_'+ i +'" onClick="console.log('+i+')"></polygon>';
 		else
 		{
 			var tris = document.getElementById("tris_" + i);
