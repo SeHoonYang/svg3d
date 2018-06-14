@@ -1,11 +1,13 @@
 /*
-	svg3d.js 0.1
+	svg3d.js 0.2
 	This file is licensed under the Apache License 2.0
 	Copyright 2018 SeHoonYang
 
 	Author : SehoonYang
 	email : yangsehoon@kaist.ac.kr
 */
+
+function svg3dContext(v){
 
 // Wrapper
 function _mat4(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) {
@@ -33,8 +35,6 @@ function decimalToHexString(number){
 
 	return "#" + temp;
 }
-
-function svg3dContext(v){
 
 this.objAdded = true;
 this.objectList = [];
