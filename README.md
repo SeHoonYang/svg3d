@@ -140,6 +140,7 @@ You can consider decreasing z-ordering frequency. This library re-create every &
 // To reset to default, call this function with parameter 0.
 yourContextVariable.setOrderingPeriod(2);
 ```
+If you increase the peroid, graphics may look unstable.
 
 # License
 Please refer to the LICENSE file.

@@ -36,7 +36,6 @@ function decimalToHexString(number){
 	return "#" + temp;
 }
 
-this.objAdded = true;
 this.objectList = [];
 this.camList = [];
 this.lightList = [];
@@ -130,7 +129,6 @@ this.Object3d = function (vertices, pos, rot, scale, defaultVertexShader) {
 this.createObject = function(vertices, pos, rot, scale) {
 	var Obj = new this.Object3d(vertices, pos, rot, scale, this.defaultVertexShader);
 	this.objectList.push(Obj);
-	this.objAdded = true;
 	return Obj;
 }
 
@@ -295,7 +293,7 @@ this.draw3d = function(){
 	for(i = 0; i < results.length; ++i) {
 		var PointString = results[i][0][0] + ',' + results[i][0][1] + ' ' + results[i][1][0] + ',' + results[i][1][1] + ' ' + results[i][2][0] + ',' + results[i][2][1];
 		var color = decimalToHexString(results[i][4]);
-		if(this.zUpdateCounter >= this.zUpdateLimit || this.objAdded)
+		if(this.zUpdateCounter >= this.zUpdateLimit)
 			HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '" id="tris_'+ results[i][5] + '_' + results[i][6] + '" onClick="console.log('+results[i][5]+', '+results[i][6]+')"></polygon>';
 		else
 		{
@@ -309,9 +307,8 @@ this.draw3d = function(){
 		}
 	}
 
-	if(this.zUpdateCounter >= this.zUpdateLimit || this.objAdded)
+	if(this.zUpdateCounter >= this.zUpdateLimit)
 	{
-		this.objAdded = false;
 		this.zUpdateCounter = 0
 		this.__initial_drawing(this.ViewPort, "<svg width='"+this.width+"' height='"+this.height+"' overflow='hidden'>" + HTMLTags + "</svg>");
 	}
