@@ -1,5 +1,5 @@
 /*
-	svg3d.js 0.2
+	svg3d.js 0.3
 	This file is licensed under the Apache License 2.0
 	Copyright 2018 SeHoonYang
 
