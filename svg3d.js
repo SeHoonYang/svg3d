@@ -54,8 +54,8 @@ this.defaultVertexShader = function(lightList, worldPosition, normal, baseColor,
 			var d = Math.max(0.1, Math.sqrt(Math.pow(light.pos[0] - worldPosition[0], 2) + Math.pow(light.pos[1] - worldPosition[1], 2) + Math.pow(light.pos[2] - worldPosition[2], 2)));
 
 			var worldPos = vec3.create();
-			vec3.normalize(worldPos, worldPosition);
-			vec3.scale(worldPos, worldPos, -1);
+			vec3.subtract(worldPos, _vec3(light.pos[0], light.pos[1], light.pos[2]), worldPosition);
+			vec3.normalize(worldPos, worldPos);
 			var dot = vec3.dot(normal, worldPos);
 
 			if(dot > 0)
