@@ -42,6 +42,7 @@ this.lightList = [];
 this.ViewPort = v;
 this.width = 0;
 this.height = 0;
+this.backfaceCullingEnabled = false;
 this.defaultVertexShader = function(lightList, worldPosition, normal, baseColor, finalColor){
 	for(k = 0; k < lightList.length; ++k)
 	{
@@ -250,11 +251,13 @@ this.draw3d = function(){
 				}
 
 				// Backface culling
-				var product = [0,0,0];
-				for(c = 0; c < 3; ++c)
-					product[c] = (this.camList[0].pos[0] - WorldPoint[c][0]) * normal[0] + (this.camList[0].pos[1] - WorldPoint[c][1]) * normal[1] + (this.camList[0].pos[2] - WorldPoint[c][2]) * normal[2];
-				if(product[0] < 0 && product[1] < 0 && product[2] < 0)
-					continue;
+				if(this.backfaceCullingEnabled){
+					var product = [0,0,0];
+					for(c = 0; c < 3; ++c)
+						product[c] = (this.camList[0].pos[0] - WorldPoint[c][0]) * normal[0] + (this.camList[0].pos[1] - WorldPoint[c][1]) * normal[1] + (this.camList[0].pos[2] - WorldPoint[c][2]) * normal[2];
+					if(product[0] < 0 && product[1] < 0 && product[2] < 0)
+						continue;
+				}
 
 				function addLight(x,y,z){
 					var r = Math.floor((x[0] + y[0] + z[0])/3);
