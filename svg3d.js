@@ -43,6 +43,7 @@ this.lightList = [];
 this.ViewPort = v;
 this.width = 0;
 this.height = 0;
+this.backfaceCullingEnabled = false;
 this.defaultVertexShader = function(lightList, worldPosition, normal, baseColor, finalColor){
 	for(k = 0; k < lightList.length; ++k)
 	{
@@ -133,39 +134,43 @@ this.createObject = function(vertices, pos, rot, scale) {
 
 this.updateCamera = function(cam, pos, rot, n, f, aspect, fov) {
 	// Camera transformation
-	var Camera = mat4.create();
+	cam.Camera = mat4.create();
 	var rot_q = quat.create();
 	quat.fromEuler(rot_q, -rot[0], -rot[1], -rot[2]);
-	mat4.fromQuat(Camera, rot_q);
-	mat4.subtract(Camera, Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
+	mat4.fromQuat(cam.Camera, rot_q);
+	mat4.subtract(cam.Camera, cam.Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
+
+	// Update obj
+	cam.pos = pos;
 
 	// Define Frustum
-	var Projection = _mat4(1 / aspect / Math.tan(fov * Math.PI / 360),0,0,0,0,1 / Math.tan(fov * Math.PI / 360),0,0,0,0,(f+n)/(n-f),-1,0,0,2*f*n/(n-f),0);
+	cam.Projection = _mat4(1 / aspect / Math.tan(fov * Math.PI / 360),0,0,0,0,1 / Math.tan(fov * Math.PI / 360),0,0,0,0,(f+n)/(n-f),-1,0,0,2*f*n/(n-f),0);
+	mat4.perspective(cam.Projection, fov* Math.PI / 180, aspect, n, f);
 
 	// Calculate View * Projection
-	cam.VP = mat4.create();
-	mat4.multiply(cam.VP, Projection, Camera);
+	mat4.multiply(cam.VP, cam.Projection, cam.Camera);
 }
 
 this.updateOrthoCamera = function(cam, pos, rot, w, h, n, f) {
 	// Camera transformation
-	var Camera = mat4.create();
 	var rot_q = quat.create();
 	quat.fromEuler(rot_q, -rot[0], -rot[1], -rot[2]);
-	mat4.fromQuat(Camera, rot_q);
-	mat4.subtract(Camera, Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
+	mat4.fromQuat(cam.Camera, rot_q);
+	mat4.subtract(cam.Camera, cam.Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
+
+	// Update obj
+	cam.pos = pos;
 
 	// Define Frustum
-	var Projection = _mat4(1 / w,0,0,0,0,1 / h,0,0,0,0,2/(n-f),0,0,0,(f+n)/(n-f),1);
+	cam.Projection = _mat4(1 / w,0,0,0,0,1 / h,0,0,0,0,2/(n-f),0,0,0,(f+n)/(n-f),1);
 
 	// Calculate View * Projection
-	cam.VP = mat4.create();
-	mat4.multiply(cam.VP, Projection, Camera);
+	mat4.multiply(cam.VP, cam.Projection, cam.Camera);
 }
 
 this.createCamera = function(pos, rot, n, f, aspect, fov) {
 	var camObj = new this.Object3d([], pos, rot, [1,1,1]);
-	var cam = new Object({obj:camObj, VP:undefined});
+	var cam = new Object({obj:camObj, VP:mat4.create(), Camera:mat4.create(), Projection:undefined});
 
 	this.updateCamera(cam, pos, rot, n, f, aspect, fov);
 	this.camList.push(cam);
@@ -173,7 +178,7 @@ this.createCamera = function(pos, rot, n, f, aspect, fov) {
 }
 this.createOrthoCamera = function(pos, rot, w, h, n, f) {
 	var camObj = new this.Object3d([], pos, rot, [1,1,1]);
-	var cam = new Object({obj:camObj, VP:undefined});
+	var cam = new Object({obj:camObj, VP:mat4.create(), Camera:mat4.create(), Projection:undefined});
 
 	this.updateOrthoCamera(cam, pos, rot, w, h, n, f);
 	this.camList.push(cam);
@@ -208,7 +213,7 @@ this.draw3d = function(){
 		var triangles = this.objectList[j].triangles;
 		for(i = 0; i < triangles.length; ++i) {
 			var PointClipMatrix = mat4.create();
-			mat4.set(PointClipMatrix, triangles[i][0][0], triangles[i][0][1], triangles[i][0][2], 1,triangles[i][1][0], triangles[i][1][1], triangles[i][1][2], 1,triangles[i][2][0], triangles[i][2][1], triangles[i][2][2], 1,0,0,0,0);
+			mat4.set(PointClipMatrix, triangles[i][0][0], triangles[i][0][1], triangles[i][0][2], 1,triangles[i][1][0], triangles[i][1][1], triangles[i][1][2], 1,triangles[i][2][0], triangles[i][2][1], triangles[i][2][2], 1,this.camList[0].pos[0],this.camList[0].pos[1],this.camList[0].pos[2],1);
 
 			// position, normal : world coordinate
 			var position = mat4.create();
@@ -222,14 +227,6 @@ this.draw3d = function(){
 
 			var WorldPoint = [_vec3(position[0], position[1], position[2]), _vec3(position[4], position[5], position[6]), _vec3(position[8], position[9], position[10])];
 
-			var finalColor = [[0,0,0],[0,0,0],[0,0,0]];
-
-			for(p = 0; p < 3; ++p)
-			{
-				var baseColor = [(triangles[i][p][3] & 0xFF0000) / 0x010000, (triangles[i][p][3] & 0xFF00) / 0x0100, triangles[i][p][3] & 0xFF];
-				this.objectList[j].vertexShader(this.lightList, WorldPoint[p], normal, baseColor, finalColor[p]);
-			}
-
 			var NormalizedPointClip0 = [PointClipMatrix[0] / PointClipMatrix[3], PointClipMatrix[1] / PointClipMatrix[3], PointClipMatrix[2] / PointClipMatrix[3]];
 			var NormalizedPointClip1 = [PointClipMatrix[4] / PointClipMatrix[7], PointClipMatrix[5] / PointClipMatrix[7], PointClipMatrix[6] / PointClipMatrix[7]];
 			var NormalizedPointClip2 = [PointClipMatrix[8] / PointClipMatrix[11], PointClipMatrix[9] / PointClipMatrix[11], PointClipMatrix[10] / PointClipMatrix[11]];
@@ -238,14 +235,32 @@ this.draw3d = function(){
 			var ScreenPoint1 = [(NormalizedPointClip1[0] * 0.5 + 0.5) * this.width, (NormalizedPointClip1[1] * 0.5 + 0.5) * this.height];
 			var ScreenPoint2 = [(NormalizedPointClip2[0] * 0.5 + 0.5) * this.width, (NormalizedPointClip2[1] * 0.5 + 0.5) * this.height];
 
+			var z = 0.5 + NormalizedPointClip0[2] * 0.5;
+
+			var finalColor = [[0,0,0],[0,0,0],[0,0,0]];
+
 			// Clipping function
 			function bounded(k, min, max){
 				return min <= k && max >= k;
 			}
-
-			var z = 0.5 + NormalizedPointClip0[2] * 0.5;
 			if(z >= 0.0 && z <= 1.0 && ((bounded(ScreenPoint0[0], 0, this.width) && bounded(ScreenPoint0[1], 0, this.height)) || (bounded(ScreenPoint1[0], 0, this.width) && bounded(ScreenPoint1[1], 0, this.height)) || (bounded(ScreenPoint2[0], 0, this.width) && bounded(ScreenPoint2[1], 0, this.height))))
 			{
+
+				for(p = 0; p < 3; ++p)
+				{
+					var baseColor = [(triangles[i][p][3] & 0xFF0000) / 0x010000, (triangles[i][p][3] & 0xFF00) / 0x0100, triangles[i][p][3] & 0xFF];
+					this.objectList[j].vertexShader(this.lightList, WorldPoint[p], normal, baseColor, finalColor[p]);
+				}
+
+				// Backface culling
+				if(this.backfaceCullingEnabled){
+					var product = [0,0,0];
+					for(c = 0; c < 3; ++c)
+						product[c] = (this.camList[0].pos[0] - WorldPoint[c][0]) * normal[0] + (this.camList[0].pos[1] - WorldPoint[c][1]) * normal[1] + (this.camList[0].pos[2] - WorldPoint[c][2]) * normal[2];
+					if(product[0] < 0 && product[1] < 0 && product[2] < 0)
+						continue;
+				}
+
 				function addLight(x,y,z){
 					var r = Math.floor((x[0] + y[0] + z[0])/3);
 					var g = Math.floor((x[1] + y[1] + z[1])/3);

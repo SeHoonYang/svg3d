@@ -27,7 +27,7 @@
 		var ViewPortHeight = 600;
 
 		var context = svg3djsInit("viewport_container", ViewPortWidth, ViewPortHeight, "#000000");
-		var bunny = context.createObject(bunny_vertices, [0, 4, -10], [90, 180, 0], [1,1,1]);
+		var bunny = context.createObject(bunny_vertices, [0, 4, -10], [90, 180, 0], [2,2,2]);
 		var sp1 = context.createObject(sp_vertices, [3,-3,-9], [0,0,0], [1,1,1]);
 		var sp2 = context.createObject(sp_vertices, [-3,0,-4], [0,0,0], [1,1,1]);
 		var sp3 = context.createObject(sp_vertices, [2.5,1,-4], [0,0,0], [1,1,1]);
@@ -35,7 +35,7 @@
 		var bunnyRotMat = bunny.getRotMat();
 
 		// Create Camera
-		var mainCamera = context.createCamera([0,0,0], [0,0,0], 0.1, 10000, ViewPortWidth / ViewPortHeight, 70);
+		var mainCamera = context.createCamera([2,-3,2], [30,0,0], 0.1, 10000, ViewPortWidth / ViewPortHeight, 70);
 		// Create PointLight
 		var pLight1 = context.createPointLight([-2,0,-4], 0xFF0000, 0.5);
 		var pLight2 = context.createPointLight([5,4,-7], 0x00AAFF, 1.0);
@@ -52,6 +52,7 @@
 
 		// Rendering Loop
 		setInterval(loop, 25);
+		var time = 0;
 
 		function loop() {
 			// Apply  rotation
@@ -69,7 +70,10 @@
 			mat4.fromYRotation(sp_rot_m, 0.05);
 			sp2.rotate(sp_rot_m);
 
+			context.updateCamera(mainCamera, [0,-3,2], [30 * Math.sin(time / 180 / 3 * Math.PI) + 30,0,0], 0.1, 10000, ViewPortWidth / ViewPortHeight, 90)
+
 			context.draw3d();
+			time = time + 1;
 		}
 	</script>
 </body>
