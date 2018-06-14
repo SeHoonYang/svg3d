@@ -38,7 +38,7 @@
 		var mainCamera = context.createCamera([2,-3,2], [30,0,0], 0.1, 10000, ViewPortWidth / ViewPortHeight, 70);
 		// Create PointLight
 		var pLight1 = context.createPointLight([-2,0,-4], 0xFF0000, 0.5);
-		var pLight2 = context.createPointLight([5,4,-7], 0x00AAFF, 1.0);
+		var dLight1 = context.createDirectionalLight([20,50,70], 0x00AAFF, 1.0);
 
 		// Mouse manipulation
 		var ViewPort = document.getElementById("viewport_container");

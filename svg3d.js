@@ -51,6 +51,18 @@ this.defaultVertexShader = function(lightList, worldPosition, normal, baseColor,
 		var light = lightList[k];
 		if(light.type == 0)
 		{
+			// Directional light
+			var dot = vec3.dot(normal, light.rot);
+
+			if(dot > 0)
+			{
+				finalColor[0] += ((light.color & 0xFF0000) / 0x010000) * light.intensity * dot * 1;
+				finalColor[1] += ((light.color & 0xFF00) / 0x0100) * light.intensity * dot * 1;
+				finalColor[2] += (light.color & 0xFF) * light.intensity * dot * 1;
+			}
+		}
+		else if(light.type == 1)
+		{
 			// Point light
 			var d = Math.max(0.1, Math.sqrt(Math.pow(light.pos[0] - worldPosition[0], 2) + Math.pow(light.pos[1] - worldPosition[1], 2) + Math.pow(light.pos[2] - worldPosition[2], 2)));
 
@@ -185,8 +197,22 @@ this.createOrthoCamera = function(pos, rot, w, h, n, f) {
 	return cam;
 
 }
+this.createDirectionalLight = function(rot, color, intensity) {
+
+	var lightDir = _vec4(0,0,-1,0);
+	var rot_q = quat.create();
+	var rot_m = mat4.create();
+	quat.fromEuler(rot_q, rot[0], rot[1], rot[2]);
+	mat4.fromQuat(rot_m, rot_q);
+	mat4.multiply(lightDir, rot_m, lightDir);
+
+	var dLight = new Object({pos:[0,0,0],rot:_vec3(lightDir[0], lightDir[1], lightDir[2]),color:color,intensity:intensity,type:0});
+	this.lightList.push(dLight);
+
+	return dLight;
+}
 this.createPointLight = function(pos, color, intensity) {
-	var pLight = new Object({pos:pos,rot:mat4.create(),color:color,intensity:intensity,type:0});
+	var pLight = new Object({pos:pos,rot:mat4.create(),color:color,intensity:intensity,type:1});
 	this.lightList.push(pLight);
 
 	return pLight;
@@ -314,7 +340,7 @@ this.draw3d = function(){
 	}
 	else
 	{
-			this.zUpdateCounter++;
+		this.zUpdateCounter++;
 	}
 }
 
