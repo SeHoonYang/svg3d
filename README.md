@@ -132,5 +132,14 @@ You can access default shader by context.defaultVertexShader:
 // This code will set your object to use the default shader
 yourObject.setVertexShader(yourContextVariable.defaultVertexShader);
 ```
+
+# Boosting Performance
+You can consider decreasing z-ordering frequency. This library re-create every &lt;polygon&gt; (per draw call) to order triangles properly. It is a bottleneck of the rendering loop. If it can skip sorting triangles on a draw call, it can just update existing polygon(rather than create a new polygon) to get better performance.
+```javascript
+// This code will calculate z-order per 3 draw call.
+// To reset to default, call this function with parameter 0.
+yourContextVariable.setOrderingPeriod(2);
+```
+
 # License
 Please refer to the LICENSE file.

@@ -44,6 +44,8 @@ this.ViewPort = v;
 this.width = 0;
 this.height = 0;
 this.backfaceCullingEnabled = false;
+this.zUpdateCounter = 0;
+this.zUpdateLimit = 0;
 this.defaultVertexShader = function(lightList, worldPosition, normal, baseColor, finalColor){
 	for(k = 0; k < lightList.length; ++k)
 	{
@@ -192,6 +194,10 @@ this.createPointLight = function(pos, color, intensity) {
 	return pLight;
 }
 
+this.setOrderingPeriod = function(t) {
+	this.zUpdateLimit = t;
+}
+
 this.draw3d = function(){
 	var HTMLTags = "";
 
@@ -213,7 +219,7 @@ this.draw3d = function(){
 		var triangles = this.objectList[j].triangles;
 		for(i = 0; i < triangles.length; ++i) {
 			var PointClipMatrix = mat4.create();
-			mat4.set(PointClipMatrix, triangles[i][0][0], triangles[i][0][1], triangles[i][0][2], 1,triangles[i][1][0], triangles[i][1][1], triangles[i][1][2], 1,triangles[i][2][0], triangles[i][2][1], triangles[i][2][2], 1,this.camList[0].pos[0],this.camList[0].pos[1],this.camList[0].pos[2],1);
+			mat4.set(PointClipMatrix, triangles[i][0][0], triangles[i][0][1], triangles[i][0][2], 1,triangles[i][1][0], triangles[i][1][1], triangles[i][1][2], 1,triangles[i][2][0], triangles[i][2][1], triangles[i][2][2], 1,0,0,0,1);
 
 			// position, normal : world coordinate
 			var position = mat4.create();
@@ -289,21 +295,29 @@ this.draw3d = function(){
 	for(i = 0; i < results.length; ++i) {
 		var PointString = results[i][0][0] + ',' + results[i][0][1] + ' ' + results[i][1][0] + ',' + results[i][1][1] + ' ' + results[i][2][0] + ',' + results[i][2][1];
 		var color = decimalToHexString(results[i][4]);
-		if(true || this.objAdded || this.backfaceCullingEnabled)
+		if(this.zUpdateCounter >= this.zUpdateLimit || this.objAdded)
 			HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '" id="tris_'+ results[i][5] + '_' + results[i][6] + '" onClick="console.log('+results[i][5]+', '+results[i][6]+')"></polygon>';
 		else
 		{
 			var tris = document.getElementById("tris_" + results[i][5] + "_" + results[i][6]);
-			tris.style['fill'] = color;
-			tris.setAttribute("points", PointString);
-			tris.setAttribute("stroke", color);
+			if(tris != null)
+			{
+				tris.style['fill'] = color;
+				tris.setAttribute("points", PointString);
+				tris.setAttribute("stroke", color);
+			}
 		}
 	}
 
-	if(true || this.objAdded || this.backfaceCullingEnabled)
+	if(this.zUpdateCounter >= this.zUpdateLimit || this.objAdded)
 	{
 		this.objAdded = false;
+		this.zUpdateCounter = 0
 		this.__initial_drawing(this.ViewPort, "<svg width='"+this.width+"' height='"+this.height+"' overflow='hidden'>" + HTMLTags + "</svg>");
+	}
+	else
+	{
+			this.zUpdateCounter++;
 	}
 }
 
