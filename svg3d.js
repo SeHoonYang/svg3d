@@ -243,7 +243,7 @@ this.draw3d = function(){
 			function bounded(k, min, max){
 				return min <= k && max >= k;
 			}
-			if(z >= 0.0 && z <= 1.0 && ((bounded(ScreenPoint0[0], 0, this.width) && bounded(ScreenPoint0[1], 0, this.height)) || (bounded(ScreenPoint1[0], 0, this.width) && bounded(ScreenPoint1[1], 0, this.height)) || (bounded(ScreenPoint2[0], 0, this.width) && bounded(ScreenPoint2[1], 0, this.height))))
+			if(bounded(z, 0, 1.0) && ((bounded(ScreenPoint0[0], 0, this.width) && bounded(ScreenPoint0[1], 0, this.height)) || (bounded(ScreenPoint1[0], 0, this.width) && bounded(ScreenPoint1[1], 0, this.height)) || (bounded(ScreenPoint2[0], 0, this.width) && bounded(ScreenPoint2[1], 0, this.height))))
 			{
 
 				for(p = 0; p < 3; ++p)
@@ -279,7 +279,7 @@ this.draw3d = function(){
 				}
 				var color = addLight(finalColor[0], finalColor[1], finalColor[2]);
 
-				var resultPoint = [ScreenPoint0, ScreenPoint1, ScreenPoint2, NormalizedPointClip0[2] + NormalizedPointClip1[2] + NormalizedPointClip2[2], color];
+				var resultPoint = [ScreenPoint0, ScreenPoint1, ScreenPoint2, NormalizedPointClip0[2] + NormalizedPointClip1[2] + NormalizedPointClip2[2], color, j, i];
 				results.push(resultPoint);
 			}
 		}
@@ -289,18 +289,18 @@ this.draw3d = function(){
 	for(i = 0; i < results.length; ++i) {
 		var PointString = results[i][0][0] + ',' + results[i][0][1] + ' ' + results[i][1][0] + ',' + results[i][1][1] + ' ' + results[i][2][0] + ',' + results[i][2][1];
 		var color = decimalToHexString(results[i][4]);
-		if(this.objAdded)
-			HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '" id="tris_'+ i +'" onClick="console.log('+i+')"></polygon>';
+		if(true || this.objAdded || this.backfaceCullingEnabled)
+			HTMLTags = HTMLTags + '<polygon points="' + PointString + '" style="fill:' + color + '" stroke="' + color + '" id="tris_'+ results[i][5] + '_' + results[i][6] + '" onClick="console.log('+results[i][5]+', '+results[i][6]+')"></polygon>';
 		else
 		{
-			var tris = document.getElementById("tris_" + i);
+			var tris = document.getElementById("tris_" + results[i][5] + "_" + results[i][6]);
 			tris.style['fill'] = color;
 			tris.setAttribute("points", PointString);
 			tris.setAttribute("stroke", color);
 		}
 	}
 
-	if(this.objAdded)
+	if(true || this.objAdded || this.backfaceCullingEnabled)
 	{
 		this.objAdded = false;
 		this.__initial_drawing(this.ViewPort, "<svg width='"+this.width+"' height='"+this.height+"' overflow='hidden'>" + HTMLTags + "</svg>");
