@@ -138,7 +138,7 @@ this.updateCamera = function(cam, pos, rot, n, f, aspect, fov) {
 	var rot_q = quat.create();
 	quat.fromEuler(rot_q, -rot[0], -rot[1], -rot[2]);
 	mat4.fromQuat(cam.Camera, rot_q);
-	mat4.subtract(cam.Camera, cam.Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
+	mat4.subtract(cam.Camera, cam.Camera, _mat4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pos[0]*cam.Camera[0] + pos[1]*cam.Camera[4] + pos[2]*cam.Camera[8], pos[0]*cam.Camera[1] + pos[1]*cam.Camera[5] + pos[2]*cam.Camera[9], pos[0]*cam.Camera[2] + pos[1]*cam.Camera[6] + pos[2]*cam.Camera[10], 0));
 
 	// Update obj
 	cam.pos = pos;
@@ -156,7 +156,7 @@ this.updateOrthoCamera = function(cam, pos, rot, w, h, n, f) {
 	var rot_q = quat.create();
 	quat.fromEuler(rot_q, -rot[0], -rot[1], -rot[2]);
 	mat4.fromQuat(cam.Camera, rot_q);
-	mat4.subtract(cam.Camera, cam.Camera, _mat4(0,0,0,0,0,0,0,0,0,0,0,0,pos[0],pos[1],pos[2],0));
+	mat4.subtract(cam.Camera, cam.Camera, _mat4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pos[0]*cam.Camera[0] + pos[1]*cam.Camera[4] + pos[2]*cam.Camera[8], pos[0]*cam.Camera[1] + pos[1]*cam.Camera[5] + pos[2]*cam.Camera[9], pos[0]*cam.Camera[2] + pos[1]*cam.Camera[6] + pos[2]*cam.Camera[10], 0));
 
 	// Update obj
 	cam.pos = pos;
